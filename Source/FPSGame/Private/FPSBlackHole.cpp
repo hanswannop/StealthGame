@@ -17,13 +17,15 @@ AFPSBlackHole::AFPSBlackHole()
 	RootComponent = MeshComp;
 
 	NucleusComp = CreateDefaultSubobject<USphereComponent>(TEXT("NucleusComp"));
+	NucleusComp->SetCollisionResponseToAllChannels(ECR_Overlap);
 	NucleusComp->SetSphereRadius(100);
 	NucleusComp->SetupAttachment(MeshComp);
 
 	NucleusComp->OnComponentBeginOverlap.AddDynamic(this, &AFPSBlackHole::BeginOverlap);
 
 	ActiveZoneComp = CreateDefaultSubobject<USphereComponent>(TEXT("ActiveZoneComp"));
-	NucleusComp->SetSphereRadius(5000);
+	ActiveZoneComp->SetCollisionResponseToAllChannels(ECR_Overlap);
+	ActiveZoneComp->SetSphereRadius(5000);
 	ActiveZoneComp->SetupAttachment(MeshComp);
 }
 
@@ -31,7 +33,6 @@ AFPSBlackHole::AFPSBlackHole()
 void AFPSBlackHole::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AFPSBlackHole::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -43,15 +44,15 @@ void AFPSBlackHole::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 		TArray<UPrimitiveComponent*> ComponentsToRappel;
 		ActiveZoneComp->GetOverlappingComponents(ComponentsToRappel);
-
+		
 		for (auto& PrimComp : ComponentsToRappel)
 		{
 			if (PrimComp && PrimComp->IsSimulatingPhysics())
 			{
 				const float SphereRadius = ActiveZoneComp->GetScaledSphereRadius();
-				const float ForceStrength = 15000;
+				const float ForceStrength = 3000;
 
-				PrimComp->AddRadialForce(this->GetActorLocation(), SphereRadius, ForceStrength, ERadialImpulseFalloff::RIF_Constant, true);
+				PrimComp->AddRadialImpulse(this->GetActorLocation(), SphereRadius, ForceStrength, ERadialImpulseFalloff::RIF_Constant, true);
 			}
 
 		}
@@ -60,7 +61,7 @@ void AFPSBlackHole::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 void AFPSBlackHole::PlayEffects()
 {
-	UGameplayStatics::SpawnEmitterAtLocation(this, ContactFX, GetActorLocation());
+	UGameplayStatics::SpawnEmitterAtLocation(this, ContactFX, GetActorLocation(), GetActorRotation(), ((FVector)((5.0F))), true, EPSCPoolMethod::None);
 }
 
 // Called every frame
@@ -76,7 +77,7 @@ void AFPSBlackHole::Tick(float DeltaTime)
 		if (PrimComp && PrimComp->IsSimulatingPhysics())
 		{
 			const float SphereRadius = ActiveZoneComp->GetScaledSphereRadius();
-			const float ForceStrength = -2000;
+			const float ForceStrength = -3000;
 			
 			PrimComp->AddRadialForce(this->GetActorLocation(), SphereRadius, ForceStrength, ERadialImpulseFalloff::RIF_Constant, true);
 		}
