@@ -14,7 +14,6 @@ class USoundBase;
 class UAnimSequence;
 class UPawnNoiseEmitterComponent;
 
-
 UCLASS()
 class AFPSCharacter : public ACharacter
 {
