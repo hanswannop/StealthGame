@@ -51,13 +51,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
 		UAnimSequence* FireAnimation;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Gameplay")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Gameplay")
 	bool bIsCarryingObjective;
 
 protected:
 	
 	/** Fires a projectile. */
 	void Fire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
 
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
@@ -74,5 +77,6 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return CameraComponent; }
 
+	virtual void Tick(float DeltaTime) override;
 };
 
